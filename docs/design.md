@@ -97,6 +97,12 @@ each server instance: one LISTEN connection
 - If the LISTEN connection drops, the instance reconnects and re-syncs every cached environment by
   querying `changedAt > cached version`, so a notification lost during the gap costs latency, not
   correctness.
+- The instance that took a write refreshes its own copy before it answers, so a client reads its own
+  write through the same instance. Other instances follow the notification and converge within the
+  propagation latency; a ruleset read there in between can be one change behind.
+- A stream whose socket has more than 4 MiB of unflushed bytes is closed instead of buffered without
+  limit. The SDK reconnects with `Last-Event-ID` and catches up.
+- Revoking a key closes its open streams on every instance, through the same notification channel.
 - Streams receive a comment line every 25 seconds so idle proxies do not cut them.
 
 ## API
