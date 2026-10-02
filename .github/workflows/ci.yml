@@ -1,0 +1,48 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [24, 26]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run typecheck
+      # The server's integration tests start Postgres with Testcontainers; the runner has Docker.
+      - run: npm test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Type-aware lint resolves @weathervane/core through its built declarations.
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run format:check
+      - name: No em dashes
+        run: |
+          if LC_ALL=C grep -rnF $'\xe2\x80\x94' --include='*.md' --include='*.ts' --exclude-dir=node_modules .; then
+            exit 1
+          fi
+      - run: npm run licenses

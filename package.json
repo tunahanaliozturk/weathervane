@@ -1,0 +1,35 @@
+{
+  "name": "weathervane",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "packages/core",
+    "packages/sdk",
+    "packages/server"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -p packages/core && tsc -p packages/sdk && tsc -p packages/server",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "licenses": "node scripts/license-audit.mjs",
+    "clean": "tsc -b --clean"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.1",
+    "@vitest/coverage-v8": "5.0.3",
+    "eslint": "10.11.0",
+    "fast-check": "4.10.2",
+    "prettier": "3.9.9",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.0",
+    "vitest": "5.0.3"
+  }
+}
