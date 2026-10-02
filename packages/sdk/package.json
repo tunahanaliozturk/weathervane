@@ -18,5 +18,8 @@
   },
   "dependencies": {
     "@weathervane/core": "0.1.0"
+  },
+  "bin": {
+    "weathervane-typegen": "./dist/typegen.js"
   }
 }

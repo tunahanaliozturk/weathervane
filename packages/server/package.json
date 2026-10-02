@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@testcontainers/postgresql": "12.2.0",
-    "@types/pg": "8.23.1"
+    "@types/pg": "8.23.1",
+    "@weathervane/node": "0.1.0"
   }
 }
