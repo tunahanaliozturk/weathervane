@@ -1,0 +1,23 @@
+# Local stack for trying Weathervane. The root key below is for this compose file only.
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: weathervane
+      POSTGRES_PASSWORD: weathervane
+      POSTGRES_DB: weathervane
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "weathervane"]
+      interval: 2s
+      retries: 30
+
+  server:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://weathervane:weathervane@postgres:5432/weathervane
+      WEATHERVANE_ROOT_KEY: local-root-key-change-me-0123456789
+    ports:
+      - "8080:8080"

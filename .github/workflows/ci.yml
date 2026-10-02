@@ -46,3 +46,13 @@ jobs:
             exit 1
           fi
       - run: npm run licenses
+
+  # Runs the README's quick start, as written, against the compose stack.
+  quickstart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker compose up -d --build --wait
+      - run: ./scripts/quickstart.sh
+      - if: failure()
+        run: docker compose logs
