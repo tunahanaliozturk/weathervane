@@ -42,6 +42,8 @@ jobs:
           PORT=8080 HOST=127.0.0.1 LOG_LEVEL=warn node packages/server/dist/main.js &
           for i in $(seq 30); do node -e "fetch('http://127.0.0.1:8080/health').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))" && break; sleep 1; done
       - name: Measure
+        # Explicit bash turns on pipefail, so a failing benchmark is not hidden by tee.
+        shell: bash
         run: |
           ulimit -n 65536
           lscpu | grep -E 'Model name|^CPU\(s\)' | tee -a "$GITHUB_STEP_SUMMARY"

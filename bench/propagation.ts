@@ -77,9 +77,12 @@ async function runWorker(count: number, sdkKey: string): Promise<void> {
   send({ kind: "open" });
   process.on("message", (message) => {
     if (message === "report") {
-      send({ kind: "arrivals", arrivals });
       for (const socket of sockets) socket.destroy();
-      process.disconnect();
+      // Disconnect only once the report is flushed: tens of thousands of samples take a while over IPC,
+      // and disconnecting early lets the parent see this process exit before the message.
+      process.send?.({ kind: "arrivals", arrivals } satisfies WorkerMessage, () => {
+        process.disconnect();
+      });
     }
   });
 }
@@ -145,7 +148,8 @@ async function runMain(): Promise<void> {
         resolve(message as WorkerMessage);
       });
       child.once("exit", (code) => {
-        reject(new Error(`worker exited with ${String(code)}`));
+        // A clean exit after its last message is expected; only a crash is an error.
+        if (code !== 0) reject(new Error(`worker exited with ${String(code)}`));
       });
     });
   await Promise.all(workers.map(nextMessage));
