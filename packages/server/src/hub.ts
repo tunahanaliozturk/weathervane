@@ -225,10 +225,20 @@ export class Hub {
     }
     state.version = environmentVersion;
     if (changed.length > 0 && state.subscribers.size > 0) {
+      const started = performance.now();
       // Serialised once, written to every subscriber.
       this.#broadcast(
         state,
         sseEvent("flags", environmentVersion, { version: environmentVersion, flags: changed }),
+      );
+      this.#log.debug(
+        {
+          environmentId,
+          version: environmentVersion,
+          streams: state.subscribers.size,
+          ms: performance.now() - started,
+        },
+        "change broadcast",
       );
     }
   }
