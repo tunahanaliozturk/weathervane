@@ -6,11 +6,11 @@
 A feature flag service in TypeScript. Change a flag once and every connected Node service has the new
 value a fraction of a second later, with no network call on the read path.
 
-With 1,000 SDK streams open, a flag change reached the median stream 29.5 ms after the write was sent
-and every stream within 49 ms. With 10,000, the server wrote the change to all of them in 16 ms
-(median of 10 changes), and the median stream had it after 150 ms. That was on one Intel Core Ultra 7
-255H laptop running the server, Postgres and the load generator together, so most of the 10,000-stream
-figure is spent outside the server's write loop. Method, raw numbers and caveats are in
+With 10,000 SDK streams open on one server instance, a flag change reached the median stream 87 ms
+after the write was sent, 99% of streams within 158 ms and the last within 183 ms. That is 20 changes on
+a 4 vCPU GitHub-hosted Linux runner (Xeon Platinum 8573C) running the server, Postgres and the load
+generator together ([run 37005752222](https://github.com/tunahanaliozturk/weathervane/actions/runs/37005752222)).
+Method, a Windows laptop run and caveats are in
 [docs/benchmark-results/propagation.md](docs/benchmark-results/propagation.md).
 
 ## Quick start

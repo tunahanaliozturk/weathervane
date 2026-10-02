@@ -3,7 +3,22 @@
 How long a flag change takes to reach every open SDK stream. Measured on 2026-10-02 with
 [`bench/propagation.ts`](../../bench/propagation.ts).
 
-## Setup
+## Linux, GitHub-hosted runner
+
+[Run 37005752222](https://github.com/tunahanaliozturk/weathervane/actions/runs/37005752222) of
+`.github/workflows/bench.yml`: an `ubuntu-latest` runner with 4 vCPUs (Intel Xeon Platinum 8573C), Node
+24.21.0, Postgres 18 as a service container, one server instance, and the load generator (4 worker
+processes, raw TCP) on the same runner. 10,000 streams, 20 flag changes 500 ms apart.
+
+| Streams | PUT p50 | PUT p99 | Per stream p50 |      p95 |      p99 |      Max | Last stream, p50 over flips |
+| ------: | ------: | ------: | -------------: | -------: | -------: | -------: | --------------------------: |
+|  10,000 | 19.8 ms | 35.0 ms |        86.6 ms | 144.2 ms | 157.9 ms | 182.9 ms |                    146.5 ms |
+
+Anyone can rerun it from the Actions tab with other stream counts.
+
+## Windows laptop
+
+### Setup
 
 - Intel Core Ultra 7 255H (16 logical CPUs), 32 GB RAM, Windows 11 Enterprise.
 - One server instance, Node 26.8.2, `LOG_LEVEL=info`, running on the host.
@@ -19,7 +34,7 @@ WEATHERVANE_ROOT_KEY=... node bench/propagation.ts --base-url http://127.0.0.1:8
   --streams 10000 --workers 4 --flips 20
 ```
 
-## Results
+### Results
 
 | Streams | PUT p50 | Per stream p50 |      p95 |      p99 |      Max | Last stream, p50 over flips |
 | ------: | ------: | -------------: | -------: | -------: | -------: | --------------------------: |
@@ -29,7 +44,7 @@ WEATHERVANE_ROOT_KEY=... node bench/propagation.ts --base-url http://127.0.0.1:8
 The server's own part, from the `change broadcast` debug log in a separate 10-flip run with 10,000
 streams: writing the event to all 10,000 sockets took 9.6 to 25.6 ms, median 15.8 ms.
 
-## Reading it
+### Reading it
 
 - Below a thousand streams, a change reaches everyone in about the time of the write itself: the `PUT`
   is a transaction plus one query, and the broadcast is a few milliseconds.
@@ -45,7 +60,6 @@ streams: writing the event to all 10,000 sockets took 9.6 to 25.6 ms, median 15.
 
 ## Not measured here
 
-- Linux. `.github/workflows/bench.yml` runs the same benchmark on a GitHub-hosted runner on demand.
 - More than one server instance. Each instance writes only to its own streams, so the fan-out cost per
   instance falls with the number of instances; the notification costs one query per instance.
 - Windows needed the connect bursts kept under the listen backlog of 511 and two minutes between runs
